@@ -90,6 +90,65 @@
     )
   )
 
+
+
+;; this section largely follows http://www.drieu.org/code/sources/tail.el
+(defun shstream-disp-window (shstream-buffer shstream-msg)
+  "Display some content specified by ``tail-msg'' inside buffer
+``tail-msg''.  Create this buffer if necessary and put it inside a
+newly created window on the lowest side of the frame."
+
+  (require 'electric)
+
+  ;; Make sure we're not in the minibuffer
+  ;; before splitting the window.
+
+  (if (equal (selected-window) (minibuffer-window))
+      (if (other-window 1) 
+          (select-window (other-window 1))
+        (if (and window-system (other-frame 1))
+            (select-frame (other-frame 1)))))
+  
+  (let* ((this-buffer (current-buffer))
+         (this-window (selected-window))
+         (shstream-disp-buf (set-buffer (get-buffer-create shstream-buffer))))
+
+    (if (cdr (assq 'unsplittable (frame-parameters)))
+        ;; In an unsplittable frame, use something somewhere else.
+        (display-buffer shstream-disp-buf)
+      (unless (or (special-display-p (buffer-name shstream-disp-buf))
+                  (same-window-p (buffer-name shstream-disp-buf))
+                  (get-buffer-window shstream-buffer))
+        
+        ;; this conflicts with pop-to-buffer induced splitting below
+        ;; ;; create a window split from available screen estate
+        ;; ;; NOTE width:height is NOT 1:1
+        ;; ;; since chars are not as wide as tall.
+        ;; ;; but also, horizontal space is worth more than vertical space,
+        ;; ;; so adjust with a weighting that (still) favors horizontal.
+        ;; ;; in actual practice, haven't noticed it really mattering from 1.
+        ;; (let ((W (window-width))
+        ;;       (H (window-height)))
+        ;;   (message "%s x %s" W H)
+        ;;   (if (< (* 1.25 H) W)
+        ;;       (split-window-horizontally)
+        ;;     (split-window-vertically)))
+        )
+      (pop-to-buffer shstream-disp-buf))
+
+    (toggle-read-only 0)
+    (insert-string shstream-msg)
+    (toggle-read-only 1)
+    (set-buffer-modified-p nil)
+    (select-window this-window)
+    ))
+
+(defun shstream-filter (process line)
+  "Tail filter called when some output comes."
+  (shstream-disp-window (process-buffer process) line))
+
+
+
 ;; This is the main function which is called to evaluate a code
 ;; block.
 ;;
