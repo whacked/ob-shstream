@@ -151,7 +151,7 @@ called by `org-babel-execute-src-block'"
              (apply 'start-process-shell-command
                     (concat "shstream-" hash-string)
                     process-buffer-name
-                    shstream-shell-command
+                    org-babel-shstream-command
                     (list tempfile-path))))     
         
         (set-process-filter process 'shstream-filter)
