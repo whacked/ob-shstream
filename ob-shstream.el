@@ -236,7 +236,9 @@ called by `org-babel-execute-src-block'"
                    (replace-match
                     (concat "#+begin_example\n"
                             (with-current-buffer (get-buffer process-buffer-name)
-                              (buffer-string))
+                              (replace-regexp-in-string
+                               ""
+                               "\n" (buffer-string) nil 'literal))
                             "\n#+end_example\n")))
                  )
                (delete-window (get-buffer-window process-buffer-name))
