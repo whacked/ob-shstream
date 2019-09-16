@@ -137,7 +137,7 @@ newly created window on the lowest side of the frame."
       (pop-to-buffer shstream-disp-buf))
 
     (toggle-read-only 0)
-    (insert-string shstream-msg)
+    (insert shstream-msg)
     (toggle-read-only 1)
     (set-buffer-modified-p nil)
     (select-window this-window)
